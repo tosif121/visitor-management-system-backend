@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const QRCode = require('qrcode');
 const Visitor = require('../models/visitorModel');
 const transporter = require('../config/emailConfig');
@@ -19,14 +20,19 @@ const registerVisitor = async (req, res) => {
       throw new Error('Failed to generate QR Code.');
     });
 
-    const tempDir = path.join(__dirname, '../temp');
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir);
-    }
-
+    // Use system's temporary directory instead of a project-specific temp folder
+    const tempDir = os.tmpdir();
     const qrCodePath = path.join(tempDir, `${Date.now()}-qrcode.png`);
+
     const base64Data = qrCodeBase64.replace(/^data:image\/png;base64,/, '');
-    fs.writeFileSync(qrCodePath, base64Data, 'base64');
+    
+    // Wrap file write in try-catch
+    try {
+      fs.writeFileSync(qrCodePath, base64Data, 'base64');
+    } catch (writeError) {
+      console.error('Error writing QR code file:', writeError);
+      // If file write fails, proceed with base64 image
+    }
 
     const visitor = await Visitor.create(req.body);
 
@@ -60,7 +66,8 @@ const registerVisitor = async (req, res) => {
       attachments: [
         {
           filename: 'qrcode.png',
-          path: qrCodePath,
+          content: base64Data,
+          encoding: 'base64',
           cid: 'qrcode',
         },
       ],
@@ -68,7 +75,8 @@ const registerVisitor = async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    fs.unlinkSync(qrCodePath);
+    // Remove file write attempt
+    // fs.unlinkSync(qrCodePath);
 
     res.status(200).json({
       status: true,
