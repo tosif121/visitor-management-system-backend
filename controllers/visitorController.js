@@ -28,7 +28,7 @@ const formatTime = (dateString) => {
 
 const registerVisitor = async (req, res) => {
   try {
-    const { fullName, email, phoneNumber, company, purpose, pickupLocation, instructions, pickupTime, visitDate } =
+    const { fullName, email, mobileNumber, company, purpose, pickupLocation, instructions, pickupTime, visitDate } =
       req.body;
 
     if (!fullName || !email) {
@@ -37,7 +37,7 @@ const registerVisitor = async (req, res) => {
 
     const visitor = await Visitor.create(req.body);
 
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/visitor-details";
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000/visitor-details';
     const qrData = `${baseUrl}?id=${visitor._id}`;
     const qrCodeBase64 = await QRCode.toDataURL(qrData);
 
@@ -57,17 +57,19 @@ const registerVisitor = async (req, res) => {
         <p>Hello ${fullName},</p>
         <p>Your visitor registration is confirmed with the following details:</p>
         <ul>
-          ${fullName && `<li><strong>Name:</strong> ${fullName}</li>`}
-          ${phoneNumber && `<li><strong>Phone Number:</strong> ${phoneNumber}</li>`}
+          ${(fullName && `<li><strong>Name:</strong> ${fullName}</li>`) || ''}
+          ${mobileNumber && `<li><strong>Mobile Number:</strong> ${mobileNumber}</li>`}
           ${email && `<li><strong>Email:</strong> ${email}</li>`}
           ${company && `<li><strong>Company:</strong> ${company}</li>`}
           ${purpose && `<li><strong>Purpose:</strong> ${purpose}</li>`}
-          ${pickupLocation && `<li><strong>Pickup Location:</strong> ${pickupLocation}</li>`}
-          ${instructions && `<li><strong>Instructions:</strong> ${instructions}</li>`}
-          ${pickupTime && `<li><strong>Pickup Time:</strong> ${formatTime(pickupTime)}</li>`}
-          ${visitDate && `<li><strong>Visit Date:</strong> ${formatDate(visitDate)}</li>`}
+          ${(pickupLocation && `<li><strong>Pickup Location:</strong> ${pickupLocation}</li>`) || ''}
+          ${(instructions && `<li><strong>Instructions:</strong> ${instructions}</li>`) || ''}
+          ${(pickupTime && `<li><strong>Pickup Time:</strong> ${formatTime(pickupTime)}</li>`) || ''}
+          ${(visitDate && `<li><strong>Visit Date:</strong> ${formatDate(visitDate)}</li>`) || ''}
         </ul>
-        <p>Scan the QR code below for entry or click <a href="${baseUrl}?id=${visitor._id}">here</a> to view details.</p>
+        <p>Scan the QR code below for entry or click <a href="${baseUrl}?id=${
+      visitor._id
+    }">here</a> to view details.</p>
         <img src="cid:qrcode" alt="Visitor QR Code" style="max-width: 150px;" />
         <p>Thank you!</p>
       </div>
