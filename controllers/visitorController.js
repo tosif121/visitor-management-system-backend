@@ -56,24 +56,37 @@ const registerVisitor = async (req, res) => {
     }
 
     const emailHtml = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Visitor Registration Confirmation</h2>
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #000;">
+      <h2 style="margin-bottom: 16px; font-size: 20px; color: #333;">Visitor Registration Confirmation</h2>
       <p>Hello ${fullName},</p>
       <p>Your visitor registration is confirmed with the following details:</p>
-      <ul>
-        ${(fullName && `<li><strong>Name:</strong> ${fullName}</li>`) || ''}
-        ${mobileNumber && `<li><strong>Mobile Number:</strong> ${mobileNumber}</li>`}
-        ${email && `<li><strong>Email:</strong> ${email}</li>`}
-        ${company && `<li><strong>Company:</strong> ${company}</li>`}
-        ${purpose && `<li><strong>Purpose:</strong> ${purpose}</li>`}
-        ${(pickupLocation && `<li><strong>Pickup Location:</strong> ${pickupLocation}</li>`) || ''}
-        ${(instructions && `<li><strong>Instructions:</strong> ${instructions}</li>`) || ''}
-        ${(pickupTime && `<li><strong>Pickup Time:</strong> ${formatTime(pickupTime)}</li>`) || ''}
-        ${(visitDate && `<li><strong>Visit Date:</strong> ${formatDateTime(visitDate)}</li>`) || ''}
+      <ul style="padding-left: 20px; margin: 16px 0;">
+        ${(fullName && `<li style="margin: 8px 0;"><strong>Name:</strong> ${fullName}</li>`) || ''}
+        ${mobileNumber && `<li style="margin: 8px 0;"><strong>Mobile Number:</strong> ${mobileNumber}</li>`}
+        ${email && `<li style="margin: 8px 0;"><strong>Email:</strong> ${email}</li>`}
+        ${company && `<li style="margin: 8px 0;"><strong>Company:</strong> ${company}</li>`}
+        ${purpose && `<li style="margin: 8px 0;"><strong>Purpose:</strong> ${purpose}</li>`}
+        ${
+          (pickupLocation && `<li style="margin: 8px 0;"><strong>Pickup Location:</strong> ${pickupLocation}</li>`) ||
+          ''
+        }
+        ${(instructions && `<li style="margin: 8px 0;"><strong>Instructions:</strong> ${instructions}</li>`) || ''}
+        ${
+          (pickupTime && `<li style="margin: 8px 0;"><strong>Pickup Time:</strong> ${formatTime(pickupTime)}</li>`) ||
+          ''
+        }
+        ${
+          (visitDate && `<li style="margin: 8px 0;"><strong>Visit Date:</strong> ${formatDateTime(visitDate)}</li>`) ||
+          ''
+        }
       </ul>
-      <p>Scan the QR code below for entry or click <a href="${baseUrl}?id=${visitor._id}">here</a> to view details.</p>
-      <img src="cid:qrcode" alt="Visitor QR Code" style="max-width: 150px;" />
-      <p>Thank you!</p>
+      <p>Scan the QR code below for entry or click <a href="${baseUrl}?id=${
+      visitor._id
+    }" style="color: #007BFF;">here</a> to view details.</p>
+      <div style="text-align: center; margin: 16px 0;">
+        <img src="cid:qrcode" alt="Visitor QR Code" style="max-width: 150px; border: 1px solid #ccc; padding: 4px;" />
+      </div>
+      <p style="font-size: 14px; color: #555;">Thank you!</p>
     </div>
   `;
 
