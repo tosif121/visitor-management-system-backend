@@ -121,4 +121,31 @@ const registerVisitor = async (req, res) => {
   }
 };
 
-module.exports = { registerVisitor };
+const getVisitorById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const visitor = await Visitor.findById(id);
+
+    if (!visitor) {
+      return res.status(404).json({
+        status: false,
+        message: 'Visitor not found',
+      });
+    }
+
+    res.status(200).json({
+      status: true,
+      message: 'Visitor data fetched successfully',
+      data: visitor,
+    });
+  } catch (error) {
+    console.error('Error fetching visitor by ID:', error);
+    res.status(500).json({
+      status: false,
+      message: 'Server error',
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { registerVisitor, getVisitorById };
