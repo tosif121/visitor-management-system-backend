@@ -5,6 +5,27 @@ const QRCode = require('qrcode');
 const Visitor = require('../models/visitorModel');
 const transporter = require('../config/emailConfig');
 
+const formatDate = (dateString) => {
+  if (!dateString) return 'Not specified';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+
+const formatTime = (dateString) => {
+  if (!dateString) return 'Not specified';
+  const date = new Date(dateString);
+  return date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  });
+};
+
 const registerVisitor = async (req, res) => {
   try {
     const { fullName, email, phoneNumber, company, purpose, pickupLocation, instructions, pickupTime, visitDate } =
@@ -14,27 +35,21 @@ const registerVisitor = async (req, res) => {
       return res.status(400).json({ status: false, message: 'Missing required fields' });
     }
 
-    const qrData = JSON.stringify(req.body);
-    const qrCodeBase64 = await QRCode.toDataURL(qrData).catch((err) => {
-      console.error('QR Code generation failed:', err);
-      throw new Error('Failed to generate QR Code.');
-    });
+    const visitor = await Visitor.create(req.body);
 
-    // Use system's temporary directory instead of a project-specific temp folder
+    const baseUrl = process.env.BASE_URL || "http://localhost:3000/visitor-details";
+    const qrData = `${baseUrl}?id=${visitor._id}`;
+    const qrCodeBase64 = await QRCode.toDataURL(qrData);
+
     const tempDir = os.tmpdir();
     const qrCodePath = path.join(tempDir, `${Date.now()}-qrcode.png`);
-
     const base64Data = qrCodeBase64.replace(/^data:image\/png;base64,/, '');
-    
-    // Wrap file write in try-catch
+
     try {
       fs.writeFileSync(qrCodePath, base64Data, 'base64');
     } catch (writeError) {
       console.error('Error writing QR code file:', writeError);
-      // If file write fails, proceed with base64 image
     }
-
-    const visitor = await Visitor.create(req.body);
 
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -42,18 +57,18 @@ const registerVisitor = async (req, res) => {
         <p>Hello ${fullName},</p>
         <p>Your visitor registration is confirmed with the following details:</p>
         <ul>
-          ${fullName ? `<li><strong>Name:</strong> ${fullName}</li>` : ''}
-          ${phoneNumber ? `<li><strong>Phone Number:</strong> ${phoneNumber}</li>` : ''}
-          ${email ? `<li><strong>Email:</strong> ${email}</li>` : ''}
-          ${company ? `<li><strong>Company:</strong> ${company}</li>` : ''}
-          ${purpose ? `<li><strong>Purpose:</strong> ${purpose}</li>` : ''}
-          ${pickupLocation ? `<li><strong>Pickup Location:</strong> ${pickupLocation}</li>` : ''}
-          ${instructions ? `<li><strong>Instructions:</strong> ${instructions}</li>` : ''}
-          ${pickupTime ? `<li><strong>Pickup Time:</strong> ${pickupTime}</li>` : ''}
-          ${visitDate ? `<li><strong>Visit Date:</strong> ${visitDate}</li>` : ''}
+          ${fullName && `<li><strong>Name:</strong> ${fullName}</li>`}
+          ${phoneNumber && `<li><strong>Phone Number:</strong> ${phoneNumber}</li>`}
+          ${email && `<li><strong>Email:</strong> ${email}</li>`}
+          ${company && `<li><strong>Company:</strong> ${company}</li>`}
+          ${purpose && `<li><strong>Purpose:</strong> ${purpose}</li>`}
+          ${pickupLocation && `<li><strong>Pickup Location:</strong> ${pickupLocation}</li>`}
+          ${instructions && `<li><strong>Instructions:</strong> ${instructions}</li>`}
+          ${pickupTime && `<li><strong>Pickup Time:</strong> ${formatTime(pickupTime)}</li>`}
+          ${visitDate && `<li><strong>Visit Date:</strong> ${formatDate(visitDate)}</li>`}
         </ul>
-        <p>Please scan the QR code below for entry:</p>
-        <img src="cid:qrcode" alt="Visitor QR Code" style="max-width: 300px;" />
+        <p>Scan the QR code below for entry or click <a href="${baseUrl}?id=${visitor._id}">here</a> to view details.</p>
+        <img src="cid:qrcode" alt="Visitor QR Code" style="max-width: 150px;" />
         <p>Thank you!</p>
       </div>
     `;
@@ -74,9 +89,6 @@ const registerVisitor = async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
-
-    // Remove file write attempt
-    // fs.unlinkSync(qrCodePath);
 
     res.status(200).json({
       status: true,
