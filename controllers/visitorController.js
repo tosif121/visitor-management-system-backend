@@ -5,14 +5,18 @@ const QRCode = require('qrcode');
 const Visitor = require('../models/visitorModel');
 const transporter = require('../config/emailConfig');
 
-const formatDate = (dateString) => {
+const formatDateTime = (dateString) => {
   if (!dateString) return 'Not specified';
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleString('en-US', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Asia/Kolkata',
+    timeZoneName: 'short',
   });
 };
 
@@ -22,7 +26,7 @@ const formatTime = (dateString) => {
   return date.toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
-    timeZoneName: 'short',
+    timeZone: 'Asia/Kolkata',
   });
 };
 
@@ -52,28 +56,26 @@ const registerVisitor = async (req, res) => {
     }
 
     const emailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2>Visitor Registration Confirmation</h2>
-        <p>Hello ${fullName},</p>
-        <p>Your visitor registration is confirmed with the following details:</p>
-        <ul>
-          ${(fullName && `<li><strong>Name:</strong> ${fullName}</li>`) || ''}
-          ${mobileNumber && `<li><strong>Mobile Number:</strong> ${mobileNumber}</li>`}
-          ${email && `<li><strong>Email:</strong> ${email}</li>`}
-          ${company && `<li><strong>Company:</strong> ${company}</li>`}
-          ${purpose && `<li><strong>Purpose:</strong> ${purpose}</li>`}
-          ${(pickupLocation && `<li><strong>Pickup Location:</strong> ${pickupLocation}</li>`) || ''}
-          ${(instructions && `<li><strong>Instructions:</strong> ${instructions}</li>`) || ''}
-          ${(pickupTime && `<li><strong>Pickup Time:</strong> ${formatTime(pickupTime)}</li>`) || ''}
-          ${(visitDate && `<li><strong>Visit Date:</strong> ${formatDate(visitDate)}</li>`) || ''}
-        </ul>
-        <p>Scan the QR code below for entry or click <a href="${baseUrl}?id=${
-      visitor._id
-    }">here</a> to view details.</p>
-        <img src="cid:qrcode" alt="Visitor QR Code" style="max-width: 150px;" />
-        <p>Thank you!</p>
-      </div>
-    `;
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>Visitor Registration Confirmation</h2>
+      <p>Hello ${fullName},</p>
+      <p>Your visitor registration is confirmed with the following details:</p>
+      <ul>
+        ${(fullName && `<li><strong>Name:</strong> ${fullName}</li>`) || ''}
+        ${mobileNumber && `<li><strong>Mobile Number:</strong> ${mobileNumber}</li>`}
+        ${email && `<li><strong>Email:</strong> ${email}</li>`}
+        ${company && `<li><strong>Company:</strong> ${company}</li>`}
+        ${purpose && `<li><strong>Purpose:</strong> ${purpose}</li>`}
+        ${(pickupLocation && `<li><strong>Pickup Location:</strong> ${pickupLocation}</li>`) || ''}
+        ${(instructions && `<li><strong>Instructions:</strong> ${instructions}</li>`) || ''}
+        ${(pickupTime && `<li><strong>Pickup Time:</strong> ${formatTime(pickupTime)}</li>`) || ''}
+        ${(visitDate && `<li><strong>Visit Date:</strong> ${formatDateTime(visitDate)}</li>`) || ''}
+      </ul>
+      <p>Scan the QR code below for entry or click <a href="${baseUrl}?id=${visitor._id}">here</a> to view details.</p>
+      <img src="cid:qrcode" alt="Visitor QR Code" style="max-width: 150px;" />
+      <p>Thank you!</p>
+    </div>
+  `;
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
