@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+const SALT_ROUNDS = 10;
+
 const signinSchema = new mongoose.Schema(
   {
     username: {
@@ -24,14 +26,21 @@ const signinSchema = new mongoose.Schema(
 
 signinSchema.pre('save', async function (next) {
   if (this.isModified('password')) {
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(SALT_ROUNDS);
     this.password = await bcrypt.hash(this.password, salt);
   }
   next();
 });
 
-signinSchema.methods.isValidPassword = async function (password) {
+signinSchema.methods.isValidPassword = function (password) {
   return bcrypt.compare(password, this.password);
+};
+
+signinSchema.methods.getPublicProfile = function () {
+  return {
+    id: this._id,
+    username: this.username,
+  };
 };
 
 signinSchema.index({ username: 1 });

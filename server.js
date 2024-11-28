@@ -5,6 +5,7 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 const connectDb = require('./config/db');
 const visitorRoutes = require('./routes/visitorRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 connectDb();
 
@@ -18,6 +19,7 @@ app.use(
 );
 
 app.use('/api', visitorRoutes);
+app.use('/api', authRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello, World!');
