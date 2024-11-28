@@ -45,6 +45,6 @@ signinSchema.methods.getPublicProfile = function () {
 
 signinSchema.index({ username: 1 });
 
-const SignIn = mongoose.model('SignIn', signinSchema);
+const Auth = mongoose.model('Auth', signinSchema);
 
-module.exports = SignIn;
+module.exports = Auth;
