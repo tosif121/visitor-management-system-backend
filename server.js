@@ -6,6 +6,7 @@ const PORT = process.env.PORT || 8000;
 const connectDb = require('./config/db');
 const visitorRoutes = require('./routes/visitorRoutes');
 const authRoutes = require('./routes/authRoutes');
+const campaign = require('./routes/campaignRoutes');
 
 connectDb();
 
@@ -17,7 +18,7 @@ app.use(
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   })
 );
-
+app.use('/api', campaign);
 app.use('/api', visitorRoutes);
 app.use('/api', authRoutes);
 
