@@ -7,4 +7,4 @@ const campaignSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Campaign", campaignSchema);
+module.exports = mongoose.model("CampaignAgent", campaignSchema);

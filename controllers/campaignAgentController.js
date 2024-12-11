@@ -1,6 +1,6 @@
-const Data = require('../models/campaignModel');
+const Data = require('../models/campaignAgentModel');
 
-const campaignSaveData = async (req, res) => {
+const campaignAgentData = async (req, res) => {
   try {
     const requestData = req.body;
 
@@ -28,7 +28,7 @@ const campaignSaveData = async (req, res) => {
   }
 };
 
-const getAllData = async (req, res) => {
+const getData = async (req, res) => {
   try {
     const allData = await Data.find();
     res.status(200).json({
@@ -45,4 +45,4 @@ const getAllData = async (req, res) => {
   }
 };
 
-module.exports = { campaignSaveData, getAllData };
+module.exports = { campaignAgentData, getData };
